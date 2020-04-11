@@ -1,0 +1,19 @@
+[package]
+name = "rustic"
+version = "0.1.0"
+description = "Restic wrapper for convenient backups"
+authors = ["Ben Navetta <ben.navetta@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0"
+human-panic = "1.0"
+paw = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+structopt = { version = "0.3", features = ["paw"] }
+slog = "2.5"
+slog-term = "2.5"
+toml = "0.5"
+tempfile = "3.1"
