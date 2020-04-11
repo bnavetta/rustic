@@ -1,3 +1,4 @@
+use std::io::{self, prelude::*};
 use std::fs;
 use std::path::{PathBuf, Path};
 use std::sync::Mutex;
@@ -7,6 +8,7 @@ use human_panic;
 use slog::{Logger, Drain, o, debug, error};
 use slog_term;
 use structopt::StructOpt;
+use tabwriter;
 use toml;
 
 mod backup;
@@ -36,7 +38,10 @@ enum Command {
     Backup {
         /// The profile to back up
         profile: String,
-    }
+    },
+    
+    /// List all profiles
+    Profiles
 }
 
 fn load_config<P: AsRef<Path>>(logger: &Logger, path: P) -> Result<Configuration> {
@@ -49,8 +54,19 @@ fn load_config<P: AsRef<Path>>(logger: &Logger, path: P) -> Result<Configuration
     let config = toml::from_str(&config_str)
         .with_context(|| format!("Could not parse configuration file {}", path.display()))?;
     
-    // TODO: OK to log config? not if it contains credentials
     Ok(config)
+}
+
+fn list_profiles(config: &Configuration) -> Result<()> {
+    let mut tw = tabwriter::TabWriter::new(io::stdout());
+    writeln!(tw, "Profile\tRepository")?;
+    writeln!(tw, "-------\t----------")?;
+    for (name, profile) in config.profiles.iter() {
+        writeln!(tw, "{}\t{}", name, profile.repository)?;
+    }
+    tw.flush()?;
+
+    Ok(())
 }
 
 fn run(args: Args, logger: &Logger) -> Result<()> {
@@ -60,6 +76,9 @@ fn run(args: Args, logger: &Logger) -> Result<()> {
         Command::Backup { profile } => {
             let restic = Restic::for_profile(&config, logger, profile)?;
             restic.backup()?;
+        },
+        Command::Profiles => {
+            list_profiles(&config)?;
         }
     };
 
