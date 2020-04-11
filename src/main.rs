@@ -1,4 +1,5 @@
 use std::io::{self, prelude::*};
+use std::ffi::OsString;
 use std::fs;
 use std::path::{PathBuf, Path};
 use std::sync::Mutex;
@@ -14,6 +15,7 @@ use toml;
 mod backup;
 mod config;
 mod restic;
+mod snapshots;
 
 use config::Configuration;
 use restic::Restic;
@@ -38,6 +40,16 @@ enum Command {
     Backup {
         /// The profile to back up
         profile: String,
+    },
+
+    /// List snapshots in a repository
+    Snapshots {
+        /// Profile defining the repository
+        profile: String,
+
+        /// Additional arguments to pass to `restic snapshots`
+        #[structopt(parse(from_os_str))]
+        extra_args: Vec<OsString>,
     },
     
     /// List all profiles
@@ -76,6 +88,10 @@ fn run(args: Args, logger: &Logger) -> Result<()> {
         Command::Backup { profile } => {
             let restic = Restic::for_profile(&config, logger, profile)?;
             restic.backup()?;
+        },
+        Command::Snapshots { profile, extra_args } => {
+            let restic = Restic::for_profile(&config, logger, profile)?;
+            restic.dump_snapshots(&extra_args)?;
         },
         Command::Profiles => {
             list_profiles(&config)?;
