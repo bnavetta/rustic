@@ -461,7 +461,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4c691c0e608126e00913e33f0ccf3727d5fc84573623b8d65b2df340b5201783"
 
 [[package]]
-name = "rustic"
+name = "rustic-backup"
 version = "0.1.0"
 dependencies = [
  "anyhow",

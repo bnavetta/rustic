@@ -1,5 +1,5 @@
 [package]
-name = "rustic"
+name = "rustic-backup"
 version = "0.1.0"
 description = "Restic wrapper for convenient backups"
 authors = ["Ben Navetta <ben.navetta@gmail.com>"]
@@ -10,6 +10,10 @@ keywords = ["restic", "backups"]
 categories = ["command-line-utilities"]
 license = "MIT OR Apache-2.0"
 edition = "2018"
+
+[[bin]]
+name = "rustic"
+path = "src/main.rs"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

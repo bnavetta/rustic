@@ -8,7 +8,7 @@ to keep all your backup settings in one place.
 Install with Cargo:
 
 ```sh
-cargo install rustic
+cargo install rustic-backup
 ```
 
 ## Usage
