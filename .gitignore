@@ -1,1 +1,2 @@
-/target
+target/
+test-config.toml

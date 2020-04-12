@@ -8,13 +8,13 @@ to keep all your backup settings in one place.
 To back up the profile `my_profile`, run:
 
 ```sh
-  $ rustic backup my_profile
+$ rustic backup my_profile
 ```
 
 To forget snapshots from `my_profile` using its configured retention policy, run:
 
 ```sh
-  $ rustic forget my_profile
+$ rustic forget my_profile
 ```
 
 You can add the `--prune` flag to `rustic forget` to automatically delete data referenced by forgotten snapshots, or seperately run `restic prune my_profile`.
@@ -22,13 +22,13 @@ You can add the `--prune` flag to `rustic forget` to automatically delete data r
 To see a list of snapshots, run:
 
 ```sh
-  $ rustic snapshots my_profile
+$ rustic snapshots my_profile
 ```
 
 `rustic snapshots` can pass arguments through to Restic to filter which snapshots are shown:
 
 ```sh
-  $ rustic snapshots my_profile -- --last
+$ rustic snapshots my_profile -- --last
 ```
 
 You can also run `rustic profiles` to print out a list of all profiles and their repository locations.
