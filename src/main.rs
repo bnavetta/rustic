@@ -14,6 +14,7 @@ use toml;
 
 mod backup;
 mod config;
+mod forget;
 mod restic;
 mod snapshots;
 
@@ -42,9 +43,25 @@ enum Command {
         profile: String,
     },
 
+    /// Forget snapshots according to the configured retention policy
+    Forget {
+        /// The profile to forget from
+        profile: String,
+
+        /// Automatically prune any forgotten snapshots
+        #[structopt(short = "p", long = "prune")]
+        prune: bool
+    },
+
+    /// Prune unreferenced data in the repository
+    Prune {
+        /// Profile to prune from
+        profile: String,
+    },
+
     /// List snapshots in a repository
     Snapshots {
-        /// Profile defining the repository
+        /// Profile to list
         profile: String,
 
         /// Additional arguments to pass to `restic snapshots`
@@ -88,6 +105,14 @@ fn run(args: Args, logger: &Logger) -> Result<()> {
         Command::Backup { profile } => {
             let restic = Restic::for_profile(&config, logger, profile)?;
             restic.backup()?;
+        },
+        Command::Forget { profile, prune } => {
+            let restic = Restic::for_profile(&config, logger, profile)?;
+            restic.forget(prune)?;
+        },
+        Command::Prune { profile } => {
+            let restic = Restic::for_profile(&config, logger, profile)?;
+            restic.prune()?;
         },
         Command::Snapshots { profile, extra_args } => {
             let restic = Restic::for_profile(&config, logger, profile)?;
