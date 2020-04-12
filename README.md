@@ -3,6 +3,14 @@
 Rustic is a wrapper around the [Restic](https://restic.net/) backup program. It adds support for backup profiles in a configuration file,
 to keep all your backup settings in one place.
 
+## Installation
+
+Install with Cargo:
+
+```sh
+cargo install rustic
+```
+
 ## Usage
 
 To back up the profile `my_profile`, run:
