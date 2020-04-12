@@ -4,8 +4,8 @@ use std::ffi::OsString;
 use std::fs;
 use std::process::{Command, Stdio};
 
-use anyhow::{Result, Context, bail};
-use slog::{Logger, o, debug};
+use anyhow::{bail, Context, Result};
+use slog::{debug, o, Logger};
 use toml;
 
 use crate::config::{Configuration, Profile};
@@ -19,14 +19,18 @@ pub struct Restic<'a> {
     shared_env: HashMap<OsString, OsString>,
 }
 
-impl <'a> Restic<'a> {
+impl<'a> Restic<'a> {
     /// Creates a new Restic wrapper for the specified profile. This performs some precomputation and validation of Restic
     /// flags, and will return an error if that validation fails (for example, if the profile does not exist or does not set
     /// a repository password).
-    pub fn for_profile(config: &'a Configuration, logger: &Logger, profile_name: String) -> Result<Restic<'a>> {
+    pub fn for_profile(
+        config: &'a Configuration,
+        logger: &Logger,
+        profile_name: String,
+    ) -> Result<Restic<'a>> {
         let profile = match config.profiles.get(&profile_name) {
             Some(profile) => profile,
-            None => bail!("Profile `{}` does not exist", profile_name)
+            None => bail!("Profile `{}` does not exist", profile_name),
         };
         let logger = logger.new(o!("profile" => profile_name));
 
@@ -42,7 +46,7 @@ impl <'a> Restic<'a> {
             profile,
             logger,
             shared_args,
-            shared_env
+            shared_env,
         })
     }
 
@@ -51,8 +55,7 @@ impl <'a> Restic<'a> {
     /// no operation-specific flags.
     pub fn new_command(&self) -> Command {
         let mut cmd = Command::new(&self.config.restic_command);
-        cmd
-            .current_dir(&self.profile.base_directory)
+        cmd.current_dir(&self.profile.base_directory)
             .args(&self.shared_args)
             .envs(&self.shared_env);
         cmd
@@ -77,14 +80,14 @@ impl <'a> Restic<'a> {
     /// running `restic snapshots`.
     pub fn repository_exists(&self) -> Result<bool> {
         let mut cmd = self.new_command();
-        cmd
-            .arg("snapshots")
+        cmd.arg("snapshots")
             .arg("--compact")
             .arg("--last")
             .stdin(Stdio::null())
             .stdout(Stdio::null())
             .stderr(Stdio::null());
-        let result = cmd.status()
+        let result = cmd
+            .status()
             .with_context(|| format!("Could not run {:?}", cmd))?;
         if result.success() {
             debug!(&self.logger, "`restic snapshots` succeeded, repository exists"; "command" => ?cmd);
@@ -96,9 +99,12 @@ impl <'a> Restic<'a> {
     }
 }
 
-
 /// Adds the repository password to the command template.
-fn add_password(profile: &Profile, args: &mut Vec<OsString>, env: &mut HashMap<OsString, OsString>) -> Result<()> {
+fn add_password(
+    profile: &Profile,
+    args: &mut Vec<OsString>,
+    env: &mut HashMap<OsString, OsString>,
+) -> Result<()> {
     if let Some(password) = &profile.password {
         if profile.password_file.is_some() {
             bail!("Cannot set both `password` and `password_file`");
@@ -136,10 +142,19 @@ fn add_credentials(profile: &Profile, env: &mut HashMap<OsString, OsString>) -> 
         // .join will resolve environment_file against base_directory if it's relative, but returns
         // environment_file itself if it's absolute.
         let environment_file = &profile.base_directory.join(environment_file);
-        let env_contents = fs::read_to_string(environment_file)
-            .with_context(|| format!("Could not read environment file {}", environment_file.display()))?;
-        let env_vars: HashMap<OsString, OsString> = toml::from_str(&env_contents)
-            .with_context(|| format!("Could not parse environment file {}", environment_file.display()))?;
+        let env_contents = fs::read_to_string(environment_file).with_context(|| {
+            format!(
+                "Could not read environment file {}",
+                environment_file.display()
+            )
+        })?;
+        let env_vars: HashMap<OsString, OsString> =
+            toml::from_str(&env_contents).with_context(|| {
+                format!(
+                    "Could not parse environment file {}",
+                    environment_file.display()
+                )
+            })?;
         for (var, value) in env_vars {
             env.insert(var, value);
         }

@@ -3,20 +3,23 @@
 use std::process::Command;
 use std::time::Instant;
 
-use anyhow::{Result, Context, anyhow};
+use anyhow::{anyhow, Context, Result};
 use itertools::join;
-use slog::{warn, info, error};
+use slog::{error, info, warn};
 
 use crate::config::RetentionPolicy;
 use crate::restic::Restic;
 
-impl <'a> Restic<'a> {
+impl<'a> Restic<'a> {
     /// Forgets snapshots according to the configured retention policy.
     pub fn forget(&self, prune: bool) -> Result<()> {
         let policy = &self.profile().retention;
         if policy.is_empty() {
-            warn!(self.logger(), "Retention policy is empty, not forgetting any snapshots");
-            return Ok(())
+            warn!(
+                self.logger(),
+                "Retention policy is empty, not forgetting any snapshots"
+            );
+            return Ok(());
         }
 
         // TODO: check if repository exists and soft-fail or init?
@@ -31,7 +34,8 @@ impl <'a> Restic<'a> {
 
         info!(self.logger(), "Forgetting snapshots"; "prune" => prune, "command" => ?cmd);
         let start = Instant::now();
-        let status = cmd.status()
+        let status = cmd
+            .status()
             .with_context(|| format!("Could not run {:?}", cmd))?;
         let duration = Instant::now() - start;
 
@@ -53,7 +57,8 @@ impl <'a> Restic<'a> {
 
         info!(self.logger(), "Pruning repository"; "command" => ?cmd);
         let start = Instant::now();
-        let status = cmd.status()
+        let status = cmd
+            .status()
             .with_context(|| format!("Could not run {:?}", cmd))?;
         let duration = Instant::now() - start;
 

@@ -1,12 +1,12 @@
-use std::io::{self, prelude::*};
 use std::ffi::OsString;
 use std::fs;
-use std::path::{PathBuf, Path};
+use std::io::{self, prelude::*};
+use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 
-use anyhow::{Result, Context};
+use anyhow::{Context, Result};
 use human_panic;
-use slog::{Logger, Drain, Level, LevelFilter, o, debug, error};
+use slog::{debug, error, o, Drain, Level, LevelFilter, Logger};
 use slog_term;
 use structopt::StructOpt;
 use tabwriter;
@@ -28,7 +28,12 @@ use restic::Restic;
 #[derive(Debug, StructOpt)]
 struct Args {
     /// Path to the Rustic configuration file
-    #[structopt(short = "c", long = "config", env = "RUSTIC_CONFIG", parse(from_os_str))]
+    #[structopt(
+        short = "c",
+        long = "config",
+        env = "RUSTIC_CONFIG",
+        parse(from_os_str)
+    )]
     config_file: PathBuf,
 
     /// Adjust the verbosity of log output. By default, only print errors and warnings. Pass `-v` for informational messages or
@@ -37,7 +42,7 @@ struct Args {
     verbose: u8,
 
     #[structopt(subcommand)]
-    command: Command
+    command: Command,
 }
 
 #[derive(Debug, StructOpt)]
@@ -55,7 +60,7 @@ enum Command {
 
         /// Automatically prune any forgotten snapshots
         #[structopt(short = "p", long = "prune")]
-        prune: bool
+        prune: bool,
     },
 
     /// Prune unreferenced data in the repository
@@ -73,9 +78,9 @@ enum Command {
         #[structopt(parse(from_os_str))]
         extra_args: Vec<OsString>,
     },
-    
+
     /// List all profiles
-    Profiles
+    Profiles,
 }
 
 fn load_config<P: AsRef<Path>>(logger: &Logger, path: P) -> Result<Configuration> {
@@ -84,10 +89,10 @@ fn load_config<P: AsRef<Path>>(logger: &Logger, path: P) -> Result<Configuration
 
     let config_str = fs::read_to_string(path)
         .with_context(|| format!("Could not read configuration file {}", path.display()))?;
-    
+
     let config = toml::from_str(&config_str)
         .with_context(|| format!("Could not parse configuration file {}", path.display()))?;
-    
+
     Ok(config)
 }
 
@@ -111,19 +116,22 @@ fn run(args: Args, logger: &Logger) -> Result<()> {
         Command::Backup { profile } => {
             let restic = Restic::for_profile(&config, logger, profile)?;
             restic.backup()?;
-        },
+        }
         Command::Forget { profile, prune } => {
             let restic = Restic::for_profile(&config, logger, profile)?;
             restic.forget(prune)?;
-        },
+        }
         Command::Prune { profile } => {
             let restic = Restic::for_profile(&config, logger, profile)?;
             restic.prune()?;
-        },
-        Command::Snapshots { profile, extra_args } => {
+        }
+        Command::Snapshots {
+            profile,
+            extra_args,
+        } => {
             let restic = Restic::for_profile(&config, logger, profile)?;
             restic.dump_snapshots(&extra_args)?;
-        },
+        }
         Command::Profiles => {
             list_profiles(&config)?;
         }
@@ -146,7 +154,10 @@ fn main(args: Args) {
     };
 
     let decorator = slog_term::TermDecorator::new().build();
-    let term_drain = slog_term::FullFormat::new(decorator).use_local_timestamp().build().fuse();
+    let term_drain = slog_term::FullFormat::new(decorator)
+        .use_local_timestamp()
+        .build()
+        .fuse();
     // Despite the slog docs, we're using a Mutex for the thread-safe drain rather than slog_async. Since this is a single-threaded program, there's
     // probably more overhead adding a thread for logging than letting the main thread use a mutex uncontested. This also means we can use the logger
     // below without having to worry about flushing it before calling std::process::exit

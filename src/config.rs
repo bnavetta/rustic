@@ -7,16 +7,15 @@ use serde::Deserialize;
 pub struct Configuration {
     /// Backup profiles
     pub profiles: HashMap<String, Profile>,
-    
+
     /// Named filesets to reuse in profiles
     #[serde(default)]
     pub filesets: HashMap<String, Fileset>,
 
     /// Location of the `restic` binary. Defaults to `restic`
     #[serde(default = "default_restic_command")]
-    pub restic_command: String
+    pub restic_command: String,
 }
-
 
 fn default_restic_command() -> String {
     "restic".into()
@@ -61,7 +60,7 @@ pub struct Profile {
     /// Files to back up
     pub include: Fileset,
 
-    /// Files to exclude from the backup 
+    /// Files to exclude from the backup
     #[serde(default)]
     pub exclude: Fileset,
 
@@ -92,18 +91,18 @@ pub struct Fileset {
     pub inherits: Vec<String>,
 
     /// File patterns to include.
-    /// 
+    ///
     /// See Restic's documentation on [including](https://restic.readthedocs.io/en/latest/040_backup.html#including-files) and
     /// [excluding](https://restic.readthedocs.io/en/latest/040_backup.html#excluding-files) files for details on how these are interpreted.
     #[serde(default)]
-    pub patterns: Vec<String>
+    pub patterns: Vec<String>,
 }
 
 /// Describes how to keep/forget snapshots.
-/// 
+///
 /// See the [Restic documentation](https://restic.readthedocs.io/en/latest/060_forget.html#removing-snapshots-according-to-a-policy).
 #[derive(Deserialize, Default)]
-#[serde(default)] 
+#[serde(default)]
 pub struct RetentionPolicy {
     /// Keep the `n` most recent snapshots
     pub keep_last: Option<usize>,
@@ -129,21 +128,19 @@ pub struct RetentionPolicy {
 
     /// Keep all snapshots with any of these tag lists. For example, if this is set to `[["tag1", "tag2"], ["tag3"]]`, Restic will keep snapshots
     /// that either have both `tag1` and `tag2` or have `tag3`.
-    pub keep_tags: Vec<Vec<String>>
-
-    // TODO: restrict to tags + host
+    pub keep_tags: Vec<Vec<String>>, // TODO: restrict to tags + host
 }
 
 impl RetentionPolicy {
     /// Returns `true` if this policy is empty (i.e. it doesn't specify any snapshots to keep)
     pub fn is_empty(&self) -> bool {
-        self.keep_last.is_none() &&
-            self.keep_hourly.is_none() &&
-            self.keep_daily.is_none() &&
-            self.keep_weekly.is_none() &&
-            self.keep_monthly.is_none() &&
-            self.keep_yearly.is_none() &&
-            self.keep_within.is_none() &&
-            self.keep_tags.is_empty()
+        self.keep_last.is_none()
+            && self.keep_hourly.is_none()
+            && self.keep_daily.is_none()
+            && self.keep_weekly.is_none()
+            && self.keep_monthly.is_none()
+            && self.keep_yearly.is_none()
+            && self.keep_within.is_none()
+            && self.keep_tags.is_empty()
     }
 }

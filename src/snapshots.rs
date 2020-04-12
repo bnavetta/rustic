@@ -2,7 +2,7 @@
 
 use std::ffi::OsString;
 
-use anyhow::{Result, Context};
+use anyhow::{Context, Result};
 use slog::debug;
 
 use crate::restic::Restic;
@@ -10,7 +10,7 @@ use crate::restic::Restic;
 // Could parse and print JSON instead of passing through to Restic
 
 /// Extends the Restic wrapper with snapshot commands
-impl <'a> Restic<'a> {
+impl<'a> Restic<'a> {
     /// List snapshots to stdout. This is a simple wrapper around the `restic snapshots` command.
     /// Extra args are added directly to the command line.
     pub fn dump_snapshots(&self, extra_args: &[OsString]) -> Result<()> {
