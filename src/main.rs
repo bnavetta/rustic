@@ -5,12 +5,8 @@ use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 
 use anyhow::{Context, Result};
-use human_panic;
 use slog::{debug, error, o, Drain, Level, LevelFilter, Logger};
-use slog_term;
 use structopt::StructOpt;
-use tabwriter;
-use toml;
 
 mod backup;
 mod config;
