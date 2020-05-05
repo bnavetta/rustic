@@ -1,0 +1,68 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  create_release:
+    name: Create a GitHub release
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{steps.create_release.outputs.upload_url}}
+    steps:
+      - id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        with:
+          tag_name: ${{github.ref}}
+          release_name: Release ${{github.ref}}
+          draft: true
+          prerelease: false
+          # TODO: changelog
+  
+  build:
+    needs: create_release
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            binary: rustic
+            content_type: application/octet-stream
+            suffix: linux-x86_64
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            binary: rustic
+            content_type: application/octet-stream
+            suffix: macos-x86_64
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            binary: rustic.exe
+            content_type: application/vnd.microsoft.portable-executable
+            suffix: windows-x86_64
+    runs-on: ${{matrix.os}}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+          target: ${{matrix.target}}
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --target ${{matrix.target}}
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{secrets.github_token}}
+        with:
+          upload_url: ${{needs.create_release.outputs.upload_url}}
+          asset_path: target/${{matrix.target}}/release/${{matrix.binary}}
+          asset_name: rustic-${{matrix.suffix}}
+          asset_content_type: ${{matrix.content_type}}
+  # TODO: push to Crates.io
