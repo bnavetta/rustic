@@ -162,3 +162,19 @@ fn add_credentials(profile: &Profile, env: &mut HashMap<OsString, OsString>) -> 
 
     Ok(())
 }
+
+#[cfg(test)]
+mod test {
+    use crate::test::TestFixture;
+
+    #[test]
+    fn test_repository_exists() {
+        let fixture = TestFixture::new();
+        let restic = fixture.restic();
+
+        assert_eq!(restic.repository_exists().unwrap(), false, "Repository does not exist yet");
+
+        restic.init().expect("Could not initialize repository");
+        assert_eq!(restic.repository_exists().unwrap(), true, "Repository should now exist");
+    }
+}

@@ -18,6 +18,9 @@ mod forget;
 mod restic;
 mod snapshots;
 
+#[cfg(test)]
+mod test;
+
 use config::Configuration;
 use restic::Restic;
 
