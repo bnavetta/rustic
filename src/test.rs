@@ -3,7 +3,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 
-use slog::{Logger, Drain, o};
+use slog::{o, Drain, Logger};
 use slog_term::{FullFormat, TermDecorator};
 use tempfile::TempDir;
 
@@ -42,7 +42,7 @@ impl TestFixture {
             exclude_caches: false,
             one_file_system: false,
             ignore_inode: false,
-            retention: RetentionPolicy::default()
+            retention: RetentionPolicy::default(),
         };
 
         let config = Configuration {
@@ -52,7 +52,7 @@ impl TestFixture {
                 profiles.insert("test".into(), profile);
                 profiles
             },
-            filesets: HashMap::new()
+            filesets: HashMap::new(),
         };
 
         let decorator = TermDecorator::new().build();
@@ -65,7 +65,7 @@ impl TestFixture {
             content_root,
             repository_path,
             config,
-            logger
+            logger,
         }
     }
 

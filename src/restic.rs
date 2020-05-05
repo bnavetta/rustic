@@ -172,9 +172,17 @@ mod test {
         let fixture = TestFixture::new();
         let restic = fixture.restic();
 
-        assert_eq!(restic.repository_exists().unwrap(), false, "Repository does not exist yet");
+        assert_eq!(
+            restic.repository_exists().unwrap(),
+            false,
+            "Repository does not exist yet"
+        );
 
         restic.init().expect("Could not initialize repository");
-        assert_eq!(restic.repository_exists().unwrap(), true, "Repository should now exist");
+        assert_eq!(
+            restic.repository_exists().unwrap(),
+            true,
+            "Repository should now exist"
+        );
     }
 }
