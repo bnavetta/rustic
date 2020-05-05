@@ -1,0 +1,13 @@
+name: Dependency Security Audit
+on:
+  schedule:
+      # Every Tuesday at 10am
+    - cron: '0 10 * * 2'
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/audit-check@v1
+        with:
+          token: ${{secrets.GITHUB_TOKEN}}
