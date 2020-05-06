@@ -148,7 +148,7 @@ fn add_credentials(profile: &Profile, env: &mut HashMap<OsString, OsString>) -> 
                 environment_file.display()
             )
         })?;
-        let env_vars: HashMap<OsString, OsString> =
+        let env_vars: HashMap<String, String> =
             toml::from_str(&env_contents).with_context(|| {
                 format!(
                     "Could not parse environment file {}",
@@ -156,7 +156,7 @@ fn add_credentials(profile: &Profile, env: &mut HashMap<OsString, OsString>) -> 
                 )
             })?;
         for (var, value) in env_vars {
-            env.insert(var, value);
+            env.insert(var.into(), value.into());
         }
     }
 
