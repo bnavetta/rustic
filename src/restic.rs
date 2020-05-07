@@ -71,6 +71,11 @@ impl<'a> Restic<'a> {
         self.profile
     }
 
+    /// Environment variables set when running commands under this profile.
+    pub fn env(&self) -> &HashMap<OsString, OsString> {
+        &self.shared_env
+    }
+
     /// Returns a logger scoped to this Restic repository
     pub fn logger(&self) -> &Logger {
         &self.logger

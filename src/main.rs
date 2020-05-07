@@ -12,6 +12,7 @@ mod backup;
 mod config;
 mod forget;
 mod restic;
+mod shell;
 mod snapshots;
 
 #[cfg(test)]
@@ -78,6 +79,15 @@ enum Command {
         extra_args: Vec<OsString>,
     },
 
+    /// Start an interactive shell configured for Restic.
+    /// 
+    /// This sets `RESTIC_REPOSITORY`, `RESTIC_PASSWORD_*`, and any other configured
+    /// environment variables, for running arbitrary `restic` commands.
+    Shell {
+        /// Profile to use
+        profile: String,
+    },
+
     /// List all profiles
     Profiles,
 }
@@ -130,6 +140,10 @@ fn run(args: Args, logger: &Logger) -> Result<()> {
         } => {
             let restic = Restic::for_profile(&config, logger, profile)?;
             restic.dump_snapshots(&extra_args)?;
+        }
+        Command::Shell { profile } => {
+            let restic = Restic::for_profile(&config, logger, profile)?;
+            restic.shell()?;
         }
         Command::Profiles => {
             list_profiles(&config)?;
