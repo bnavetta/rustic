@@ -80,7 +80,7 @@ enum Command {
     },
 
     /// Start an interactive shell configured for Restic.
-    /// 
+    ///
     /// This sets `RESTIC_REPOSITORY`, `RESTIC_PASSWORD_*`, and any other configured
     /// environment variables, for running arbitrary `restic` commands.
     Shell {

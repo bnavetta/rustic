@@ -3,7 +3,7 @@ use std::process::Command;
 
 use slog::{debug, error};
 
-use anyhow::{Context, Result, bail};
+use anyhow::{bail, Context, Result};
 
 use crate::restic::Restic;
 
@@ -12,7 +12,7 @@ impl<'a> Restic<'a> {
     pub fn shell(&self) -> Result<()> {
         let shell = match shell_command() {
             Some(shell) => shell,
-            None => bail!("Could not determine shell")
+            None => bail!("Could not determine shell"),
         };
         debug!(self.logger(), "Spawning shell `{}`", shell);
 
