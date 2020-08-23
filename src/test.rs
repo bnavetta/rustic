@@ -52,6 +52,7 @@ impl TestFixture {
                 profiles.insert("test".into(), profile);
                 profiles
             },
+            cache_directory: None,
             filesets: HashMap::new(),
         };
 
