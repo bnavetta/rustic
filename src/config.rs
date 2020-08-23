@@ -15,6 +15,11 @@ pub struct Configuration {
     /// Location of the `restic` binary. Defaults to `restic`
     #[serde(default = "default_restic_command")]
     pub restic_command: String,
+
+    /// Root cache directory for repository metadata. Defaults to a system-specific cache location.
+    /// Within this directory, restic creates a sub-directory for each repository.
+    #[serde(default)]
+    pub cache_directory: Option<PathBuf>
 }
 
 fn default_restic_command() -> String {

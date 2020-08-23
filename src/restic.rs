@@ -41,6 +41,10 @@ impl<'a> Restic<'a> {
         shared_args.push("--repo".into());
         shared_args.push(profile.repository.to_string().into());
 
+        if let Some(ref cache_directory) = config.cache_directory {
+            shared_env.insert("RESTIC_CACHE_DIR".into(), cache_directory.into());
+        }
+
         Ok(Restic {
             config,
             profile,
